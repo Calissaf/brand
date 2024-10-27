@@ -1,4 +1,4 @@
-package org.qrush.brand;
+package org.qrush.brand.brand;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

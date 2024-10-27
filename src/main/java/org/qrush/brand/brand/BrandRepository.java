@@ -1,4 +1,4 @@
-package org.qrush.brand;
+package org.qrush.brand.brand;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
