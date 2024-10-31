@@ -1,14 +1,15 @@
-package org.qrush.brand.brand;
+package org.qrush.brand.unit.brand;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.service.spi.ServiceException;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.qrush.brand.brand.Brand;
+import org.qrush.brand.brand.BrandController;
+import org.qrush.brand.brand.BrandService;
 import org.qrush.brand.brand.exceptions.BrandNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -47,8 +48,9 @@ class BrandControllerTests {
 
     @Test
     void createBrand_WhenBrandSuccessfullyCreated_ReturnsCreatedStatus() {
-        Brand brand = new Brand("Starbucks");
-        brand.setId(1L);
+        Brand brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
         when(brandService.createBrand(brand)).thenReturn(brand);
 
         var result = brandController.createBrand(brand);
@@ -58,8 +60,9 @@ class BrandControllerTests {
 
     @Test
     void createBrand_WhenBrandSuccessfullyCreated_ReturnsCreatedBrand() {
-        Brand brand = new Brand("Starbucks");
-        brand.setId(1L);
+        Brand brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
         when(brandService.createBrand(brand)).thenReturn(brand);
 
         var result = brandController.createBrand(brand);
@@ -69,8 +72,9 @@ class BrandControllerTests {
 
     @Test
     void createBrand_WhenBrandServiceThrowsException_ReturnsInternalServerErrorStatus() {
-        var brand = new Brand("Starbucks");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
         when(brandService.createBrand(brand)).thenThrow(ServiceException.class);
 
         var result = brandController.createBrand(brand);
@@ -96,8 +100,9 @@ class BrandControllerTests {
 
     @Test
     void getBrand_WhenBrandExists_ReturnsOKStatus() {
-        var brand = new Brand("Starbucks");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
 
         when(brandService.getBrand(brand.getId())).thenReturn(brand);
 
@@ -108,8 +113,9 @@ class BrandControllerTests {
 
     @Test
     void getBrand_WhenBrandExists_ReturnsBrand() {
-        var brand = new Brand("Starbucks");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
 
         when(brandService.getBrand(brand.getId())).thenReturn(brand);
 
@@ -144,10 +150,12 @@ class BrandControllerTests {
     // whenBrandServiceThrowsServiceException_Return500
     @Test
     void getAllBrands_WhenBrandsExist_ReturnsOkStatus() {
-        var brand1 = new Brand("Starbucks");
-        brand1.setId(1L);
-        var brand2 = new Brand("Costa");
-        brand2.setId(2L);
+        var brand1 = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
+        var brand2 = new Brand()
+                .setName("Costa")
+                .setId(2L);
 
         var allBrands = new ArrayList<Brand>();
         allBrands.add(brand1);
@@ -161,10 +169,12 @@ class BrandControllerTests {
 
     @Test
     void getAllBrands_WhenBrandsExist_ReturnsAllBrands() {
-        var brand1 = new Brand("Starbucks");
-        brand1.setId(1L);
-        var brand2 = new Brand("Costa");
-        brand2.setId(2L);
+        var brand1 = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
+        var brand2 = new Brand()
+                .setName("Costa")
+                .setId(2L);
 
         var allBrands = new ArrayList<Brand>();
         allBrands.add(brand1);
@@ -203,8 +213,9 @@ class BrandControllerTests {
 
     @Test
     void deleteBrand_WhenBrandExists_ReturnsNoContentStatus() {
-        var brand = new Brand("Starbucks");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
 
         when(brandService.deleteBrand(brand.getId())).thenReturn(brand.getId());
 

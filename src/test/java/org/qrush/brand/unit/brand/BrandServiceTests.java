@@ -1,4 +1,4 @@
-package org.qrush.brand.brand;
+package org.qrush.brand.unit.brand;
 
 import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.qrush.brand.brand.Brand;
+import org.qrush.brand.brand.BrandRepository;
+import org.qrush.brand.brand.BrandService;
 import org.qrush.brand.brand.exceptions.BrandNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -38,7 +41,7 @@ class BrandServiceTests {
 
     @Test
     void getBrand_WhenBrandExists_ReturnsBrand() {
-        var brand = new Brand("Starbucks");
+        var brand = new Brand().setName("Starbucks");
         var brandId = 1L;
         brand.setId(brandId);
         when(brandRepository.findById(brandId)).thenReturn(Optional.of(brand));
@@ -69,11 +72,9 @@ class BrandServiceTests {
 
         // Arrange
         List<Brand> brands = Arrays.asList(
-                new Brand("Starbucks"),
-                new Brand("Costa")
+                new Brand().setName("Starbucks").setId(1L),
+                new Brand().setName("Costa").setId(2L)
         );
-        brands.get(0).setId(1L);
-        brands.get(1).setId(2L);
 
         when(brandRepository.findAll()).thenReturn(brands);
 
@@ -110,8 +111,10 @@ class BrandServiceTests {
 
     @Test
     void createBrand_shouldCreateBrand_whenBrandValid() {
-        var brand = new Brand("Starbucks");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
+
         when(brandRepository.save(brand)).thenReturn(brand);
 
         var result = brandRepository.save(brand);
@@ -121,8 +124,10 @@ class BrandServiceTests {
 
     @Test
     void createBrand_shouldThrowServiceException_whenBrandNameNull() {
-        var brand = new Brand(null);
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName(null)
+                .setId(1L);
+
 
         var expectedInternalMessage = "Brand name cannot be null or empty.";
         var expectedMessage = "Error creating brand";
@@ -137,8 +142,9 @@ class BrandServiceTests {
 
     @Test
     void createBrand_shouldThrowServiceException_whenBrandNameEmpty() {
-        var brand = new Brand("");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("")
+                .setId(1L);
 
         var expectedInternalMessage = "Brand name cannot be null or empty.";
         var expectedMessage = "Error creating brand";
@@ -153,8 +159,9 @@ class BrandServiceTests {
 
     @Test
     void createBrand_shouldThrowServiceException_whenBrandRepositoryThrowsException() {
-        var brand = new Brand("Starbucks");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
 
         when(brandRepository.save(brand)).thenThrow(RuntimeException.class);
 
@@ -168,8 +175,9 @@ class BrandServiceTests {
 
     @Test
     void createBrand_shouldThrowServiceException_whenBrandRepositoryThrowsDataIntegrityException() {
-        var brand = new Brand("Starbucks");
-        brand.setId(1L);
+        var brand = new Brand()
+                .setName("Starbucks")
+                .setId(1L);
 
         when(brandRepository.save(brand)).thenThrow(DataIntegrityViolationException.class);
 

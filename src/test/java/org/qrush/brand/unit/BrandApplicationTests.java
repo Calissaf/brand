@@ -1,4 +1,4 @@
-package org.qrush.brand;
+package org.qrush.brand.unit;
 
 import org.junit.jupiter.api.Test;
 

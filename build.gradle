@@ -27,9 +27,14 @@ dependencies {
 	testImplementation 'org.mockito:mockito-core'
 	testImplementation 'com.h2database:h2:1.3.148'
 
+	testCompileOnly 'org.projectlombok:lombok:1.18.34'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	compileOnly("org.springframework.boot:spring-boot-devtools")
+	compileOnly('org.projectlombok:lombok:1.18.34')
+	annotationProcessor('org.projectlombok:lombok:1.18.34')
 }
 
 bootJar {
