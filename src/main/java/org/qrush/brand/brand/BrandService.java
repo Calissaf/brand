@@ -1,13 +1,16 @@
 package org.qrush.brand.brand;
 
-import org.hibernate.service.spi.ServiceException;
+import org.qrush.brand.brand.dto.BrandDto;
+import org.qrush.brand.brand.dto.BrandResponse;
+import org.qrush.brand.brand.exceptions.BrandAlreadyExists;
 import org.qrush.brand.brand.exceptions.BrandNotFoundException;
-import org.qrush.brand.brand.exceptions.InvalidBrandException;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.qrush.brand.brand.models.Brand;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BrandService {
@@ -18,54 +21,55 @@ public class BrandService {
         this.brandRepository = brandRepository;
     }
 
-    public Brand getBrand(Long id) {
-        Optional<Brand> brand = brandRepository.findById(id);
-        if (brand.isEmpty()) {
-            throw new BrandNotFoundException("Brand not found");
-        }
-        return brand.get();
+    public BrandDto getBrandById(Long id) {
+       Brand brand = brandRepository.findById(id).orElseThrow(() -> new BrandNotFoundException("Brand could not be found"));
+       return mapToDto(brand);
     }
 
-    public List<Brand> getAllBrands() {
-        try {
-            var brands =  brandRepository.findAll();
-            if (brands.isEmpty()) {
-                throw new BrandNotFoundException("Brands not found");
-            }
-            return brands;
-        } catch (Exception e) {
-            throw new ServiceException("Brands not found", e);
-        }
+    public BrandResponse getAllBrands(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Brand> brands = brandRepository.findAll(pageable);
+        List<Brand> listOfBrands = brands.getContent();
+        List<BrandDto> content = listOfBrands.stream().map(this::mapToDto).toList();
+
+        BrandResponse brandResponse = new BrandResponse();
+        brandResponse.setContent(content);
+        brandResponse.setPageNumber(brands.getNumber());
+        brandResponse.setPageSize(brands.getSize());
+        brandResponse.setTotalElements(brands.getTotalElements());
+        brandResponse.setTotalPages(brands.getTotalPages());
+        brandResponse.setLast(brands.isLast());
+
+        return brandResponse;
     }
 
-    public Brand createBrand(Brand brand) {
-        try {
-           validateBrand(brand);
-           return brandRepository.save(brand);
-        } catch (DataIntegrityViolationException e) {
-            throw new ServiceException("Error saving brand: possible constraint violation.", e);
-        } catch (Exception e) {
-            throw new ServiceException("Error creating brand", e);
+    public BrandDto createBrand(BrandDto brandDto) {
+        Brand brand = new Brand();
+        brand.setName(brandDto.getName());
+
+        var existingBrand = brandRepository.findByName(brand.getName()).orElse(null);
+        if (existingBrand != null) {
+            throw new BrandAlreadyExists("Brand name already exists");
         }
+
+        Brand newBrand = brandRepository.save(brand);
+
+        BrandDto brandResponse = new BrandDto();
+        brandResponse.setId(newBrand.getId());
+        brandResponse.setName(newBrand.getName());
+        return brandResponse;
     }
 
-    public Long deleteBrand(Long id) {
-        try {
-            if (brandRepository.existsById(id)) {
-                brandRepository.deleteById(id);
-                return id;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw new ServiceException("Error deleting brand", e);
-        }
+    public void deleteBrand(Long id) {
+       Brand brand = brandRepository.findById(id).orElseThrow(() -> new BrandNotFoundException("Brand not found"));
+       brandRepository.delete(brand);
     }
 
-    private void validateBrand(Brand brand) {
-        if (brand.getName() == null || brand.getName().isEmpty()) {
-            throw new InvalidBrandException("Brand name cannot be null or empty.");
-        }
+    private BrandDto mapToDto(Brand brand) {
+        BrandDto brandDto = new BrandDto();
+        brandDto.setId(brand.getId());
+        brandDto.setName(brand.getName());
+        return brandDto;
     }
 }
 

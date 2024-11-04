@@ -1,242 +1,203 @@
 package org.qrush.brand.unit.brand;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.qrush.brand.brand.Brand;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.qrush.brand.brand.BrandController;
 import org.qrush.brand.brand.BrandService;
+import org.qrush.brand.brand.dto.BrandDto;
+import org.qrush.brand.brand.dto.BrandResponse;
+import org.qrush.brand.brand.exceptions.BrandAlreadyExists;
 import org.qrush.brand.brand.exceptions.BrandNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.qrush.brand.brand.models.Brand;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
+@WebMvcTest(controllers = BrandController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@ExtendWith(MockitoExtension.class)
 class BrandControllerTests {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
     private BrandService brandService;
 
-    @Mock
-    private HttpServletRequest request;
-
-    @InjectMocks
-    private BrandController brandController;
+    @Autowired
+    private ObjectMapper objectMapper;
+    private Brand brand;
+    private BrandDto brandDto;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
+    public void init() {
+        brand = Brand.builder().name("Starbucks").build();
+        brandDto = BrandDto.builder().name("Starbucks").build();
     }
 
     //region CREATE
-    // happy path
-    // whenBrandSuccessfullyCreated_Return201
-    // whenBrandSuccessfullyCreated_ReturnNewBrand
-    // unhappy path
-    // whenBrandServiceThrowsException_Return500
-    // whenBrandRequestInvalid_Return400
-
     @Test
-    void createBrand_WhenBrandSuccessfullyCreated_ReturnsCreatedStatus() {
-        Brand brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-        when(brandService.createBrand(brand)).thenReturn(brand);
+    void brandController_CreateBrand_ReturnsCreatedBrand() throws Exception {
+        given(brandService.createBrand(ArgumentMatchers.any())).willAnswer((invocation -> invocation.getArgument(0)));
 
-        var result = brandController.createBrand(brand);
+        ResultActions response = mockMvc.perform(post("/brand/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)));
 
-        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        response.andExpect(MockMvcResultMatchers.status().isCreated());
+        response.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(brandDto)));
     }
 
     @Test
-    void createBrand_WhenBrandSuccessfullyCreated_ReturnsCreatedBrand() {
-        Brand brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-        when(brandService.createBrand(brand)).thenReturn(brand);
+    void brandController_CreateBrand_GivenEmptyJSON_ReturnsBadRequest() throws Exception {
 
-        var result = brandController.createBrand(brand);
+        ResultActions response = mockMvc.perform(post("/brand/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Collections.EMPTY_MAP)));
 
-        assertSame(brand, result.getBody());
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Validation failed for: name (Brand name cannot be null or empty), "));
     }
 
     @Test
-    void createBrand_WhenBrandServiceThrowsException_ReturnsInternalServerErrorStatus() {
-        var brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-        when(brandService.createBrand(brand)).thenThrow(ServiceException.class);
+    void brandController_CreateBrand_GivenInvalidJSON_ReturnsBadRequest() throws Exception {
 
-        var result = brandController.createBrand(brand);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+        ResultActions response = mockMvc.perform(post("/brand/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Collections.singletonMap("request", "this doesn't match our schema"))));
+
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Validation failed for: name (Brand name cannot be null or empty), "));
     }
 
     @Test
-    void createBrand_WhenBrandRequestedNoName_ReturnsBadRequestStatus() {
-        var invalidBrand = new Brand();
+    void brandController_CreateBrand_WhenBrandRepositoryFails_ReturnInternalServerError() throws Exception {
+        when(brandService.createBrand(ArgumentMatchers.any())).thenThrow(ServiceException.class);
 
-        var result = brandController.createBrand(invalidBrand);
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        ResultActions response = mockMvc.perform(post("/brand/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
+
+    @Test
+    void brandController_CreateBrand_WhenBrandAlreadyExists_ReturnsConflict() throws Exception {
+        when(brandService.createBrand(ArgumentMatchers.any())).thenThrow(BrandAlreadyExists.class);
+
+        ResultActions response = mockMvc.perform(post("/brand/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isConflict());
     }
 
     //endregion
 
-    //region GET
-    // happy
-    // get id that exists return brand
-    // unhappy
-    // get id that doesn't exist returns 404 not found
-    // brand service throws exception returns 500
-
+    //region GETBYID
     @Test
-    void getBrand_WhenBrandExists_ReturnsOKStatus() {
-        var brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
+    void brandController_GetBrandById_ReturnsBrandDto() throws Exception {
+        Long id = 1L;
+        when(brandService.getBrandById(id)).thenReturn(brandDto);
 
-        when(brandService.getBrand(brand.getId())).thenReturn(brand);
+        ResultActions response = mockMvc.perform(get("/brand/" + id));
 
-        var result = brandController.getBrand(brand.getId());
-
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        response.andExpect(MockMvcResultMatchers.status().isOk());
+        response.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(brandDto)));
     }
 
     @Test
-    void getBrand_WhenBrandExists_ReturnsBrand() {
-        var brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
+    void brandController_GetBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
+        Long id = 1L;
+        when(brandService.getBrandById(id)).thenThrow(BrandNotFoundException.class);
 
-        when(brandService.getBrand(brand.getId())).thenReturn(brand);
+        ResultActions response = mockMvc.perform(get("/brand/" + id));
 
-        var result = brandController.getBrand(brand.getId());
-
-        assertEquals(brand, result.getBody());
+        response.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
-    void getBrand_WhenBrandDoesNotExist_ReturnsNotFoundStatus() {
-        when(brandService.getBrand(1L)).thenThrow(BrandNotFoundException.class);
+    void brandController_GetBrandById_WhenBrandRepositoryFails_ReturnsInternalServerError() throws Exception {
+        Long id = 1L;
+        when(brandService.getBrandById(id)).thenThrow(ServiceException.class);
 
-        var result = brandController.getBrand(1L);
-        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        ResultActions response = mockMvc.perform(get("/brand/" + id));
+
+        response.andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
+    //endregion
+
+    //region GETALL
+    @Test
+    void brandController_GetAllBrands_ReturnsResponseDto() throws Exception {
+        BrandResponse responseDto = BrandResponse.builder().pageNumber(1).pageSize(10).content(Collections.singletonList(brandDto)).build();
+        when(brandService.getAllBrands(1, 10)).thenReturn(responseDto);
+
+        ResultActions response = mockMvc.perform(get("/brand")
+                .param("pageNo", "1")
+                .param("pageSize", "10"));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk());
+        response.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(responseDto)));
     }
 
     @Test
-    void getBrand_WhenBrandServiceThrowsServiceException_ReturnsInternalServerErrorStatus() {
-        when(brandService.getBrand(1L)).thenThrow(ServiceException.class);
+    void brandController_GetAllBrands_WhenBrandRepositoryFails_ReturnsInternalServerError() throws Exception {
+        when(brandService.getAllBrands(1, 10)).thenThrow(ServiceException.class);
 
-        var result = brandController.getBrand(1L);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+        ResultActions response = mockMvc.perform(get("/brand")
+                .param("pageNo", "1")
+                .param("pageSize", "10"));
+
+        response.andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
-    // endregion
+    //endregion
 
-    // region GET ALL
-    // happy
-    // whenBrandsExist_ReturnsAllBrands
-    // whenBrandsExist_Returns200
-    // unhappy
-    // whenNoBrandsExist_Return404
-    // whenBrandServiceThrowsServiceException_Return500
+    //region DELETE
     @Test
-    void getAllBrands_WhenBrandsExist_ReturnsOkStatus() {
-        var brand1 = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-        var brand2 = new Brand()
-                .setName("Costa")
-                .setId(2L);
+    void brandController_DeleteBrandById_ReturnsNoContent() throws Exception {
+        Long id = 1L;
+        doNothing().when(brandService).deleteBrand(id);
 
-        var allBrands = new ArrayList<Brand>();
-        allBrands.add(brand1);
-        allBrands.add(brand2);
+        ResultActions response = mockMvc.perform(delete(String.format("/brand/%d/delete", id)));
 
-        when(brandService.getAllBrands()).thenReturn(allBrands);
-        var result = brandController.getAllBrands();
-
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        response.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     @Test
-    void getAllBrands_WhenBrandsExist_ReturnsAllBrands() {
-        var brand1 = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-        var brand2 = new Brand()
-                .setName("Costa")
-                .setId(2L);
+    void brandController_DeleteBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
+        Long id = 1L;
+        doThrow(BrandNotFoundException.class).when(brandService).deleteBrand(id);
 
-        var allBrands = new ArrayList<Brand>();
-        allBrands.add(brand1);
-        allBrands.add(brand2);
+        ResultActions response = mockMvc.perform(delete(String.format("/brand/%d/delete", id)));
 
-        when(brandService.getAllBrands()).thenReturn(allBrands);
-        var result = brandController.getAllBrands();
-
-        assertEquals(allBrands, result.getBody());
+        response.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
-    void getAllBrands_WhenBrandDoesNotExist_ReturnsNotFoundStatus() {
-        when(brandService.getAllBrands()).thenThrow(BrandNotFoundException.class);
+    void brandController_DeleteBrandById_WhenBrandRepositoryFails_ReturnsInternalServerError() throws Exception {
+        Long id = 1L;
+        doThrow(ServiceException.class).when(brandService).deleteBrand(id);
 
-        var result = brandController.getAllBrands();
-        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        ResultActions response = mockMvc.perform(delete(String.format("/brand/%d/delete", id)));
+
+        response.andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
-
-    @Test
-    void getAllBrands_WhenBrandServiceThrowsServiceException_ReturnsInternalServerErrorStatus() {
-        when(brandService.getAllBrands()).thenThrow(ServiceException.class);
-
-        var result = brandController.getAllBrands();
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
-    }
-    // endregion
-
-    // region DELETE
-    // happy
-    // whenBrandExists_IfDeleteIsSuccessful_Return204
-    // unhappy
-    // whenBrandServiceDoesn'tReturnID_Return??
-    // whenBrandDoesntExist_Return404
-    // whenBrandServiceThrowsServiceException_Return500
-
-    @Test
-    void deleteBrand_WhenBrandExists_ReturnsNoContentStatus() {
-        var brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-
-        when(brandService.deleteBrand(brand.getId())).thenReturn(brand.getId());
-
-        var result = brandController.deleteBrand(brand.getId());
-        assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
-    }
-
-    @Test
-    void deleteBrand_WhenBrandDoesNotExist_ReturnsNotFoundStatus() {
-        when(brandService.deleteBrand(1L)).thenReturn(null);
-
-        var result = brandController.deleteBrand(1L);
-        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
-    }
-
-    @Test
-    void deleteBrand_WhenBrandServiceThrowsServiceException_ReturnsInternalServerErrorStatus() {
-        when(brandService.deleteBrand(1L)).thenThrow(ServiceException.class);
-
-        var result = brandController.deleteBrand(1L);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
-    }
-    // endregion
+    //endregion
 }

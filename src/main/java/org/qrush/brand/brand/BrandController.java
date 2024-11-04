@@ -1,14 +1,11 @@
 package org.qrush.brand.brand;
 
-import org.hibernate.service.spi.ServiceException;
-import org.qrush.brand.brand.exceptions.BrandNotFoundException;
-import org.springframework.http.MediaType;
+import jakarta.validation.Valid;
+import org.qrush.brand.brand.dto.BrandDto;
+import org.qrush.brand.brand.dto.BrandResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/brand")
@@ -20,60 +17,33 @@ public class BrandController {
         this.brandService = brandService;
     }
 
-    @GetMapping("/hello")
-    public String sayHello(@RequestParam(value = "myName", defaultValue = "World") String name) {
-        return String.format("Hello biscuit %s!", name);
+    @GetMapping("/test")
+    public String test() {
+        return "Hello biscuit!";
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> createBrand(@RequestBody Brand brand) {
-        try {
-            var result = brandService.createBrand(brand);
-            var location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri();
-
-            return ResponseEntity.created(location).body(result);
-        } catch (ServiceException e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/{id}")
+    public ResponseEntity<BrandDto> getBrand(@PathVariable Long id) {
+        return ResponseEntity.ok(brandService.getBrandById(id));
     }
 
-    @GetMapping
-    public ResponseEntity<Brand> getBrand(@RequestParam(value = "id") Long id) {
-        try {
-            var result = brandService.getBrand(id);
-            return ResponseEntity.ok(result);
-        } catch (BrandNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    @GetMapping()
+    public ResponseEntity<BrandResponse> getAllBrands(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
+    ) {
+        return ResponseEntity.ok(brandService.getAllBrands(pageNo, pageSize));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Brand>> getAllBrands() {
-        try {
-            var brands = brandService.getAllBrands();
-            return ResponseEntity.ok(brands);
-        } catch (BrandNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    @PostMapping("/create")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<BrandDto> createBrand(@RequestBody @Valid BrandDto brandDto) {
+        return new ResponseEntity<>(brandService.createBrand(brandDto), HttpStatus.CREATED);
     }
 
-    @DeleteMapping
-    public ResponseEntity<Object> deleteBrand(@RequestParam(value = "id") Long id) {
-        try {
-            var result = brandService.deleteBrand(id);
-            if (Objects.equals(result, id)) {
-                return ResponseEntity.noContent().build();
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity<Object> deleteBrand(@PathVariable Long id) {
+        brandService.deleteBrand(id);
+        return ResponseEntity.noContent().build();
     }
 }

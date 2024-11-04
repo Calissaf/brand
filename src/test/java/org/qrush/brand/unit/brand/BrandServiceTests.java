@@ -1,24 +1,28 @@
 package org.qrush.brand.unit.brand;
 
-import org.hibernate.service.spi.ServiceException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.qrush.brand.brand.Brand;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.qrush.brand.brand.BrandRepository;
 import org.qrush.brand.brand.BrandService;
+import org.qrush.brand.brand.dto.BrandDto;
+import org.qrush.brand.brand.dto.BrandResponse;
+import org.qrush.brand.brand.exceptions.BrandAlreadyExists;
 import org.qrush.brand.brand.exceptions.BrandNotFoundException;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.qrush.brand.brand.models.Brand;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class BrandServiceTests {
 
     @Mock
@@ -27,214 +31,108 @@ class BrandServiceTests {
     @InjectMocks
     private BrandService brandService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    //region GET
-    //GET brand
-    //happy
-    //when valid id provided and brand exists return brand
-    //unhappy
-    //when brand does not exist throw service exception
-
+    //region CREATE
     @Test
-    void getBrand_WhenBrandExists_ReturnsBrand() {
-        var brand = new Brand().setName("Starbucks");
-        var brandId = 1L;
-        brand.setId(brandId);
-        when(brandRepository.findById(brandId)).thenReturn(Optional.of(brand));
+    public void BrandService_CreateBrand_ReturnsBrandDto() {
+        Brand brand = Brand.builder()
+                .name("Starbucks")
+                .build();
 
-        var result = brandService.getBrand(brandId);
+        BrandDto brandDto = BrandDto.builder()
+                .name(brand.getName())
+                .build();
 
-       assertSame(brand, result);
+        when(brandRepository.save(Mockito.any(Brand.class))).thenReturn(brand);
+
+        BrandDto savedBrandDto = brandService.createBrand(brandDto);
+
+        assertNotNull(savedBrandDto);
+        assertEquals(savedBrandDto.getName(), brand.getName());
     }
 
     @Test
-    void getBrand_WhenBrandDoesNotExist_ThrowsServiceException() {
-        when(brandRepository.findById(1L)).thenReturn(Optional.empty());
-        var expectedMessage = "Brand not found";
+    public void BrandService_CreateBrand_WhenBrandAlreadyExists_ThrowBrandAlreadyExistsException() {
+        Brand brand = Brand.builder()
+                .name("Starbucks")
+                .build();
 
-        var exception = assertThrows(BrandNotFoundException.class, () -> brandService.getBrand(1L));
-        assertEquals(expectedMessage, exception.getMessage());
-    }
+        BrandDto brandDto = BrandDto.builder()
+                .name(brand.getName())
+                .build();
 
+        when(brandRepository.findByName(Mockito.any(String.class))).thenReturn(Optional.of(brand));
 
-    // region GET all brands
-    //happy
-    //when x returns all brands
-    //unhappy
-    // when x throws service exception
-    // ToDo: REWORK test to be more concise!!!
-    @Test
-    void getAllBrands_shouldReturnListOfBrands_whenBrandsExist() {
-
-        // Arrange
-        List<Brand> brands = Arrays.asList(
-                new Brand().setName("Starbucks").setId(1L),
-                new Brand().setName("Costa").setId(2L)
-        );
-
-        when(brandRepository.findAll()).thenReturn(brands);
-
-        // Act
-        List<Brand> result = brandService.getAllBrands();
-
-        // Assert
-        assertSame(brands, result);
-        verify(brandRepository, times(1)).findAll(); // ToDo: separate test?
-    }
-
-    @Test
-    void getAllBrands_shouldThrowServiceException_whenBrandRepositoryThrowsException() {
-
-        // Arrange
-        when(brandRepository.findAll()).thenThrow(RuntimeException.class);
-        var expectedMessage = "Brands not found";
-
-        // Assert
-        var exception = assertThrows(ServiceException.class, () -> brandService.getAllBrands());
-        var actualMessage = exception.getMessage();
-
-        assertEquals(expectedMessage, actualMessage);
+        assertThrows(BrandAlreadyExists.class, () -> brandService.createBrand(brandDto));
     }
     //endregion
 
-    //region CREATE
-    //CREATE brand
-    //happy
-    //create new brand
-    //unhappy
-    //when repository throws Service Exception throw ServiceException
-    //if brand name null or empty throw ServiceException
-
+    //region GET
     @Test
-    void createBrand_shouldCreateBrand_whenBrandValid() {
-        var brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
+    void BrandService_FindById_ReturnsBrandDto() {
+        Long id = 1L;
 
-        when(brandRepository.save(brand)).thenReturn(brand);
+        Brand brand = Brand.builder()
+                .id(id)
+                .name("Starbucks")
+                .build();
 
-        var result = brandRepository.save(brand);
+        when(brandRepository.findById(id)).thenReturn(Optional.ofNullable(brand));
 
-        assertSame(brand, result);
+        BrandDto brandReturn = brandService.getBrandById(id);
+
+        assertNotNull(brandReturn);
+        assertEquals(brand.getName(), brandReturn.getName());
+        assertEquals(brand.getId(), brandReturn.getId());
     }
 
     @Test
-    void createBrand_shouldThrowServiceException_whenBrandNameNull() {
-        var brand = new Brand()
-                .setName(null)
-                .setId(1L);
+    void BrandService_FindById_BrandDoesntExist_ThrowsBrandNotFoundException() {
+        Long id = 1L;
 
+        when(brandRepository.findById(id)).thenReturn(Optional.empty());
 
-        var expectedInternalMessage = "Brand name cannot be null or empty.";
-        var expectedMessage = "Error creating brand";
-
-        var exception = assertThrows(ServiceException.class, () -> brandService.createBrand(brand));
-        var actualMessage = exception.getMessage();
-        var actualInternalMessage = exception.getCause().getMessage();
-
-        assertEquals(expectedInternalMessage, actualInternalMessage);
-        assertEquals(expectedMessage, actualMessage);
+        assertThrows(BrandNotFoundException.class, () -> brandService.getBrandById(id));
     }
+    //endregion
 
+    // region GET all brands
     @Test
-    void createBrand_shouldThrowServiceException_whenBrandNameEmpty() {
-        var brand = new Brand()
-                .setName("")
-                .setId(1L);
+    public void BrandService_FindAll_ReturnsBrandResponse() {
+        @SuppressWarnings("unchecked")
+        Page<Brand> brands = Mockito.mock(Page.class);
 
-        var expectedInternalMessage = "Brand name cannot be null or empty.";
-        var expectedMessage = "Error creating brand";
+        when(brandRepository.findAll(Mockito.any(Pageable.class))).thenReturn(brands);
 
-        var exception = assertThrows(ServiceException.class, () -> brandService.createBrand(brand));
-        var actualMessage = exception.getMessage();
-        var actualInternalMessage = exception.getCause().getMessage();
+        BrandResponse brandResponse = brandService.getAllBrands(1, 10);
 
-        assertEquals(expectedInternalMessage, actualInternalMessage);
-        assertEquals(expectedMessage, actualMessage);
-    }
-
-    @Test
-    void createBrand_shouldThrowServiceException_whenBrandRepositoryThrowsException() {
-        var brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-
-        when(brandRepository.save(brand)).thenThrow(RuntimeException.class);
-
-        var expectedMessage = "Error creating brand";
-
-        var exception = assertThrows(ServiceException.class, () -> brandService.createBrand(brand));
-        var actualMessage = exception.getMessage();
-
-        assertEquals(expectedMessage, actualMessage);
-    }
-
-    @Test
-    void createBrand_shouldThrowServiceException_whenBrandRepositoryThrowsDataIntegrityException() {
-        var brand = new Brand()
-                .setName("Starbucks")
-                .setId(1L);
-
-        when(brandRepository.save(brand)).thenThrow(DataIntegrityViolationException.class);
-
-        var expectedMessage = "Error saving brand: possible constraint violation.";
-
-        var exception = assertThrows(ServiceException.class, () -> brandService.createBrand(brand));
-        var actualMessage = exception.getMessage();
-
-        assertEquals(expectedMessage, actualMessage);
+        assertNotNull(brandResponse);
     }
     //endregion
 
     //region DELETE
-    //DELETE brand
-    //happy
-    //when id exists delete brand
-    // when id exists returns id
-    //unhappy
-    //when id does not exist return null
-    //when repository throws exception throw service exception
     @Test
-    void deleteBrand_WhenBrandExists_DeletesBrand() {
-        when(brandRepository.existsById(1L)).thenReturn(true);
+    public void BrandService_DeleteBrand_ReturnsVoid() {
+        Long id = 1L;
+        Brand brand = Brand.builder()
+                .name("Starbucks")
+                .id(id)
+                .build();
 
-        assertDoesNotThrow(() -> brandService.deleteBrand(1L));
-        verify(brandRepository, times(1)).deleteById(1L);
-    }
-    @Test
-    void deleteBrand_WhenBrandExists_ReturnsId() {
-        var id = 1L;
-        when(brandRepository.existsById(id)).thenReturn(true);
+        when(brandRepository.findById(id)).thenReturn(Optional.ofNullable(brand));
 
-        var result = brandService.deleteBrand(id);
-        assertEquals(id, result);
+        assertNotNull(brand);
+        doNothing().when(brandRepository).delete(brand);
+
+        assertAll(() -> brandService.deleteBrand(id));
     }
 
     @Test
-    void deleteBrand_WhenBrandDoesNotExist_ReturnNull() {
-        when(brandRepository.existsById(1L)).thenReturn(false);
+    void BrandService_DeleteBrand_BrandDoesntExist_ThrowsBrandNotFoundException() {
+        Long id = 1L;
 
-        var result = brandService.deleteBrand(1L);
+        when(brandRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertNull(result);
+        assertThrows(BrandNotFoundException.class, () -> brandService.deleteBrand(id));
     }
-
-    @Test
-    void deleteBrand_WhenBrandRepositoryThrowsException_ThrowsServiceException() {
-        when(brandRepository.existsById(1L)).thenReturn(true);
-        doThrow(RuntimeException.class).when(brandRepository).deleteById(1L);
-        var expectedMessage = "Error deleting brand";
-
-        var exception = assertThrows(ServiceException.class, () -> brandService.deleteBrand(1L));
-        var actualMessage = exception.getMessage();
-
-        assertEquals(expectedMessage, actualMessage);
-    }
-
-
     //endregion
 }
