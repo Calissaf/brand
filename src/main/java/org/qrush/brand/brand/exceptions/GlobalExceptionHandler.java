@@ -29,14 +29,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
-        StringBuilder validationErrors = new StringBuilder("Validation failed for: ");
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            validationErrors.append(error.getField())
-                    .append(" (")
-                    .append(error.getDefaultMessage())
-                    .append("), ");
-        });
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, validationErrors.toString());
+        var validationErrors = formatValidationErrors(ex);
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, validationErrors);
         problemDetail.setInstance(URI.create(request.getContextPath()));
 
         return new ResponseEntity<>(problemDetail, headers, statusCode);
@@ -47,5 +42,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         problemDetail.setInstance(URI.create(request.getContextPath()));
         return new ResponseEntity<>(problemDetail, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private String formatValidationErrors(MethodArgumentNotValidException ex) {
+        StringBuilder validationErrors = new StringBuilder("Validation failed for: ");
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            validationErrors.append(error.getField())
+                    .append(" (")
+                    .append(error.getDefaultMessage())
+                    .append("), ");
+        });
+
+        return validationErrors.toString();
     }
 }
