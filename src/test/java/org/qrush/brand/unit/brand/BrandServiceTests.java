@@ -33,7 +33,7 @@ class BrandServiceTests {
 
     //region CREATE
     @Test
-    public void BrandService_CreateBrand_ReturnsBrandDto() {
+    public void brandService_CreateBrand_ReturnsBrandDto() {
         Brand brand = Brand.builder()
                 .name("Starbucks")
                 .build();
@@ -51,7 +51,7 @@ class BrandServiceTests {
     }
 
     @Test
-    public void BrandService_CreateBrand_WhenBrandAlreadyExists_ThrowBrandAlreadyExistsException() {
+    public void brandService_CreateBrand_GivenBrandAlreadyExists_ThrowBrandAlreadyExistsException() {
         Brand brand = Brand.builder()
                 .name("Starbucks")
                 .build();
@@ -68,7 +68,7 @@ class BrandServiceTests {
 
     //region GET
     @Test
-    void BrandService_FindById_ReturnsBrandDto() {
+    void brandService_FindById_ReturnsBrandDto() {
         Long id = 1L;
 
         Brand brand = Brand.builder()
@@ -86,7 +86,7 @@ class BrandServiceTests {
     }
 
     @Test
-    void BrandService_FindById_BrandDoesntExist_ThrowsBrandNotFoundException() {
+    void brandService_FindById_GivenBrandDoesntExist_ThrowsBrandNotFoundException() {
         Long id = 1L;
 
         when(brandRepository.findById(id)).thenReturn(Optional.empty());
@@ -97,7 +97,7 @@ class BrandServiceTests {
 
     // region GET all brands
     @Test
-    public void BrandService_FindAll_ReturnsBrandResponse() {
+    public void brandService_FindAll_ReturnsBrandResponse() {
         @SuppressWarnings("unchecked")
         Page<Brand> brands = Mockito.mock(Page.class);
 
@@ -111,7 +111,7 @@ class BrandServiceTests {
 
     //region DELETE
     @Test
-    public void BrandService_DeleteBrand_ReturnsVoid() {
+    public void brandService_DeleteBrand_ReturnsVoid() {
         Long id = 1L;
         Brand brand = Brand.builder()
                 .name("Starbucks")
@@ -127,7 +127,7 @@ class BrandServiceTests {
     }
 
     @Test
-    void BrandService_DeleteBrand_BrandDoesntExist_ThrowsBrandNotFoundException() {
+    void brandService_DeleteBrand_GivenBrandDoesntExist_ThrowsBrandNotFoundException() {
         Long id = 1L;
 
         when(brandRepository.findById(id)).thenReturn(Optional.empty());

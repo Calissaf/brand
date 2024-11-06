@@ -1,5 +1,6 @@
 package org.qrush.brand.unit.brand;
 
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.qrush.brand.brand.BrandRepository;
 import org.qrush.brand.brand.models.Brand;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +34,38 @@ public class BrandRepositoryTests {
         assertNotNull(savedBrand.getId());
         assertTrue(savedBrand.getId() > 0, "id is greater than 0");
         assertEquals(brand.getName(), savedBrand.getName());
+    }
+
+    @Test
+    public void brandRepository_Save_GivenEmptyBrandName_ThrowsConstraintViolationException() {
+        Brand brand = Brand.builder()
+                .name("")
+                .build();
+
+        assertThrows(ConstraintViolationException.class, () -> brandRepository.save(brand));
+    }
+
+    @Test
+    public void brandRepository_Save_GivenNullBrandName_ThrowsConstraintViolationException() {
+        Brand brand = Brand.builder()
+                .name(null)
+                .build();
+
+        assertThrows(ConstraintViolationException.class, () -> brandRepository.save(brand));
+    }
+
+    @Test
+    public void brandRepository_SaveDuplicateBrand_ThrowsDataIntegrityViolationException() {
+        Brand brand1 = Brand.builder()
+                .name("Starbucks")
+                .build();
+
+        Brand brand2 = Brand.builder()
+                .name("Starbucks")
+                .build();
+
+        brandRepository.save(brand1);
+        assertThrows(DataIntegrityViolationException.class, () -> brandRepository.save(brand2));
     }
 
     @Test
@@ -72,6 +106,13 @@ public class BrandRepositoryTests {
     }
 
     @Test
+    public void brandRepository_FindById_GivenBrandIdDoesntExist_ReturnsNull() {
+        Brand foundBrand = brandRepository.findById(1L).orElse(null);
+
+        assertNull(foundBrand);
+    }
+
+    @Test
     public void brandRepository_FindByName_ReturnsBrand() {
         Brand brand = Brand.builder()
                 .name("Starbucks")
@@ -85,6 +126,13 @@ public class BrandRepositoryTests {
         assertNotNull(foundBrand.getId());
         assertTrue(foundBrand.getId() > 0, "id is greater than 0");
         assertEquals(brand.getName(), foundBrand.getName());
+    }
+
+    @Test
+    public void brandRepository_FindByName_GivenBrandNameDoesntExist_ReturnsNull() {
+        Brand foundBrand = brandRepository.findByName("Starbucks").orElse(null);
+
+        assertNull(foundBrand);
     }
 
     @Test

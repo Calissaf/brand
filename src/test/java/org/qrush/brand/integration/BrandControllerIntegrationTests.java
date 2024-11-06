@@ -33,7 +33,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     //region POST "/create"
     @Test
     @DisplayName("Happy Path Test: create and return brand")
-    void givenValidBrand_whenCreateBrand_ThenReturnBrand() throws Exception {
+    void brandControllerIntegration_CreateBrand_ReturnsBrandDto() throws Exception {
 
         BrandDto createdBrand = performPostRequestExpectedSuccess(BRAND_API_ENDPOINT + "/create", brandDto, BrandDto.class);
 
@@ -44,7 +44,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Exception Test: brand name must not be null")
-    void givenNullBrandName_whenCreateBrand_ThenReturnBadRequest() throws Exception {
+    void brandControllerIntegration_CreateBrand_GivenNullBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName(null);
 
         ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ProblemDetail.class);
@@ -55,8 +55,20 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("Exception Test: brand name must not be empty")
+    void brandControllerIntegration_CreateBrand_GivenEmptyBrandName_ReturnsBadRequest() throws Exception {
+        brandDto.setName("");
+
+        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ProblemDetail.class);
+
+        assertNotNull(problemDetail);
+        assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
+        assertEquals("Validation failed for: name (Brand name cannot be null or empty), ", problemDetail.getDetail());
+    }
+
+    @Test
     @DisplayName("Exception Test: brand already exists")
-    void givenBrandAlreadyExists_whenCreateBrand_ThenReturnConflict() throws Exception {
+    void brandControllerIntegration_CreateBrand_GivenBrandAlreadyExists_ReturnsConflict() throws Exception {
         Brand brand = generateBrand();
         brandRepository.save(brand);
 
@@ -71,7 +83,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     //region GET "/id"
     @Test
     @DisplayName("Happy Path Test: gets brand dto")
-    void givenValidBrandDto_whenGetBrand_ThenReturnBrand() throws Exception {
+    void brandControllerIntegration_GetBrandById_ReturnsBrandDto() throws Exception {
         Brand brand = generateBrand();
         brandRepository.save(brand);
 
@@ -86,7 +98,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Exception Test: brand does not exist")
-    void givenBrandDoesNotExist_whenGetBrand_ThenReturnNotFound() throws Exception {
+    void brandControllerIntegration_GetBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
 
         ProblemDetail problemDetail = performGetRequestExpectClientError(BRAND_API_ENDPOINT + "/1", ProblemDetail.class);
 
@@ -99,7 +111,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     //region GET "/"
     @Test
     @DisplayName("Happy Path Test: gets response dto")
-    void GetAll_ReturnsResponseDto() throws Exception {
+    void brandControllerIntegration_GetAllBrands_ReturnsResponseDto() throws Exception {
         int pageNo = 0;
         int pageSize = 10;
 
@@ -130,7 +142,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     @SneakyThrows
     @Test
     @DisplayName("Happy Path Test: deletes brand and returns no content")
-    void givenBrandId_WhenBrandExists_DeleteBrand() {
+    void brandControllerIntegration_DeleteBrandById_ReturnsNoContent() throws Exception {
         Brand brand = generateBrand();
         brandRepository.save(brand);
 
@@ -145,7 +157,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     @SneakyThrows
     @Test
     @DisplayName("ExceptionTest: when brand does not exist returns not found")
-    void givenBrandId_WhenBrandDoesNotExists_DeleteBrand() {
+    void brandControllerIntegration_DeleteBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
         var url = String.format("%s/%s/delete", BRAND_API_ENDPOINT, 1);
 
         var response = performDeleteRequestExpectClientError(url);
