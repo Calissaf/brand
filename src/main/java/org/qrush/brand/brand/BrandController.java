@@ -17,11 +17,6 @@ public class BrandController {
         this.brandService = brandService;
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "Hello biscuit!";
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<BrandDto> getBrand(@PathVariable Long id) {
         return ResponseEntity.ok(brandService.getBrandById(id));
@@ -36,7 +31,6 @@ public class BrandController {
     }
 
     @PostMapping("/create")
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<BrandDto> createBrand(@RequestBody @Valid BrandDto brandDto) {
         return new ResponseEntity<>(brandService.createBrand(brandDto), HttpStatus.CREATED);
     }
