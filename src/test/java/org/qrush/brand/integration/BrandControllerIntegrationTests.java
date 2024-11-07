@@ -11,13 +11,17 @@ import org.qrush.brand.brand.models.Brand;
 import org.qrush.brand.integration.base.AbstractIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
@@ -135,6 +139,30 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
         assertEquals(pageNo, brandResponse.getPageNumber());
         assertEquals(pageSize, brandResponse.getPageSize());
         assertEquals(brandDtoExpectedResponse, brandResponse.getContent().getFirst());
+    }
+
+    @Test
+    @DisplayName("Exception Test: when no brands found returns no content")
+    void brandControllerIntegration_GetAllBrands_WhenBrandNotFound_ReturnsNoContent() throws Exception {
+        int pageNo = 1;
+        int pageSize = 10;
+
+        Brand brand = generateBrand();
+        brandRepository.save(brand);
+
+        var uri = UriComponentsBuilder.fromUri(new URI(BRAND_API_ENDPOINT))
+                .queryParam("pageNo", pageNo)
+                .queryParam("pageSize", pageSize)
+                .build().toUri()
+                .toString();
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(uri)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent())
+                .andReturn();
+
+        assertEquals("", result.getResponse().getContentAsString());
+        assertEquals(HttpStatus.NO_CONTENT.value(), result.getResponse().getStatus());
     }
     //endregion
 

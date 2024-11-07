@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -147,11 +148,11 @@ class BrandControllerTests {
     //region GETALL
     @Test
     void brandController_GetAllBrands_ReturnsResponseDto() throws Exception {
-        BrandResponse responseDto = BrandResponse.builder().pageNumber(1).pageSize(10).content(Collections.singletonList(brandDto)).build();
-        when(brandService.getAllBrands(1, 10)).thenReturn(responseDto);
+        BrandResponse responseDto = BrandResponse.builder().pageNumber(0).pageSize(10).content(Collections.singletonList(brandDto)).build();
+        when(brandService.getAllBrands(0, 10)).thenReturn(responseDto);
 
         ResultActions response = mockMvc.perform(get("/brand")
-                .param("pageNo", "1")
+                .param("pageNo", "0")
                 .param("pageSize", "10"));
 
         response.andExpect(MockMvcResultMatchers.status().isOk());
@@ -160,13 +161,25 @@ class BrandControllerTests {
 
     @Test
     void brandController_GetAllBrands_WhenBrandRepositoryFails_ReturnsInternalServerError() throws Exception {
-        when(brandService.getAllBrands(1, 10)).thenThrow(ServiceException.class);
+        when(brandService.getAllBrands(0, 10)).thenThrow(ServiceException.class);
 
         ResultActions response = mockMvc.perform(get("/brand")
-                .param("pageNo", "1")
+                .param("pageNo", "0")
                 .param("pageSize", "10"));
 
         response.andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
+
+    @Test
+    void brandController_GetAllBrands_WhenBrandsNotFound_ReturnsNoContent() throws Exception {
+        BrandResponse responseDto = BrandResponse.builder().pageNumber(0).pageSize(10).content(List.of()).build();
+        when(brandService.getAllBrands(0, 10)).thenReturn(responseDto);
+
+        ResultActions response = mockMvc.perform(get("/brand")
+                .param("pageNo", "0")
+                .param("pageSize", "10"));
+
+        response.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
     //endregion
 

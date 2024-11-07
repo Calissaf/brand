@@ -27,6 +27,11 @@ public class BrandController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
+        BrandResponse response = brandService.getAllBrands(pageNo, pageSize);
+
+        if(response.getContent().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
         return ResponseEntity.ok(brandService.getAllBrands(pageNo, pageSize));
     }
 
