@@ -2,6 +2,7 @@ package org.qrush.brand.brand.exceptions;
 
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.*;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,6 +10,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.net.URI;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -29,10 +31,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
-        var validationErrors = formatValidationErrors(ex);
+        var validationErrors = ex.getBindingResult().getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, validationErrors);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request parameters");
         problemDetail.setInstance(URI.create(request.getContextPath()));
+        problemDetail.setProperty("invalid-params", validationErrors);
 
         return new ResponseEntity<>(problemDetail, headers, statusCode);
     }
@@ -42,17 +45,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         problemDetail.setInstance(URI.create(request.getContextPath()));
         return new ResponseEntity<>(problemDetail, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    private String formatValidationErrors(MethodArgumentNotValidException ex) {
-        StringBuilder validationErrors = new StringBuilder("Validation failed for: ");
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            validationErrors.append(error.getField())
-                    .append(" (")
-                    .append(error.getDefaultMessage())
-                    .append("), ");
-        });
-
-        return validationErrors.toString();
     }
 }

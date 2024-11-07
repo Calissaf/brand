@@ -72,7 +72,8 @@ class BrandControllerTests {
                 .content(objectMapper.writeValueAsString(Collections.EMPTY_MAP)));
 
         response.andExpect(MockMvcResultMatchers.status().isBadRequest());
-        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Validation failed for: name (Brand name cannot be null or empty), "));
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Invalid request parameters"));
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.invalid-params.name").value("Brand name cannot be null or empty"));
     }
 
     @Test
@@ -83,8 +84,8 @@ class BrandControllerTests {
                 .content(objectMapper.writeValueAsString(Collections.singletonMap("request", "this doesn't match our schema"))));
 
         response.andExpect(MockMvcResultMatchers.status().isBadRequest());
-        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Validation failed for: name (Brand name cannot be null or empty), "));
-    }
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Invalid request parameters"));
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.invalid-params.name").value("Brand name cannot be null or empty"));    }
 
     @Test
     void brandController_CreateBrand_WhenBrandRepositoryFails_ReturnInternalServerError() throws Exception {

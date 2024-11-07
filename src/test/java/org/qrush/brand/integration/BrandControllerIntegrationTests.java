@@ -51,7 +51,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
-        assertEquals("Validation failed for: name (Brand name cannot be null or empty), ", problemDetail.getDetail());
+        assertEquals("Invalid request parameters", problemDetail.getDetail());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
-        assertEquals("Validation failed for: name (Brand name cannot be null or empty), ", problemDetail.getDetail());
+        assertEquals("Invalid request parameters", problemDetail.getDetail());
     }
 
     @Test
