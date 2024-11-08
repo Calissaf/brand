@@ -109,6 +109,59 @@ class BrandServiceTests {
     }
     //endregion
 
+    //region PUT
+    @Test
+    public void brandService_UpdateBrand_ReturnsBrandDto() {
+        Brand brand = Brand.builder()
+                .name("Starbucks")
+                .id(1L)
+                .build();
+
+        BrandDto brandDto = BrandDto.builder()
+                .name(brand.getName())
+                .id(brand.getId())
+                .build();
+
+        when(brandRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(brand));
+        when(brandRepository.findByName(Mockito.any(String.class))).thenReturn(Optional.empty());
+        when(brandRepository.save(Mockito.any(Brand.class))).thenReturn(brand);
+
+        BrandDto savedBrandDto = brandService.updateBrand(brandDto, brandDto.getId());
+
+        assertNotNull(savedBrandDto);
+        assertEquals(savedBrandDto.getName(), brand.getName());
+    }
+
+    @Test
+    public void brandService_UpdateBrand_GivenBrandDoesNotExist_ThrowsBrandNotFoundException() {
+        BrandDto brandDto = BrandDto.builder()
+                .name("Starbucks")
+                .id(1L)
+                .build();
+        when(brandRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.empty());
+
+        assertThrows(BrandNotFoundException.class, () -> brandService.updateBrand(brandDto, brandDto.getId()));
+    }
+
+    @Test
+    public void brandService_UpdateBrand_GivenBrandNameAlreadyExist_ThrowsBrandAlreadyExistsException() {
+        Brand brand = Brand.builder()
+                .name("Starbucks")
+                .id(1L)
+                .build();
+
+        BrandDto brandDto = BrandDto.builder()
+                .name(brand.getName())
+                .id(brand.getId())
+                .build();
+
+        when(brandRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(brand));
+        when(brandRepository.findByName(Mockito.any(String.class))).thenReturn(Optional.of(brand));
+
+        assertThrows(BrandAlreadyExists.class, () -> brandService.updateBrand(brandDto, brandDto.getId()));
+    }
+    //endregion
+
     //region DELETE
     @Test
     public void brandService_DeleteBrand_ReturnsVoid() {

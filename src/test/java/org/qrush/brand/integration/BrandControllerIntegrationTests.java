@@ -166,6 +166,73 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     }
     //endregion
 
+    //region PUT "/id"
+    @Test
+    @DisplayName("Happy Path Test: update and return brand")
+    void brandControllerIntegration_UpdateBrand_ReturnsBrandDto() throws Exception {
+        Brand brand = generateBrand();
+        brandRepository.save(brand);
+
+        String id = brand.getId().toString();
+
+        brandDto.setName("Costa");
+
+        BrandDto updatedBrand = performPutRequestExpectedSuccess(BRAND_API_ENDPOINT + "/" +id, brandDto, BrandDto.class);
+
+        assertNotNull(updatedBrand);
+        assertEquals(brandDto.getName(), updatedBrand.getName());
+        assertEquals(1L, updatedBrand.getId());
+    }
+
+    @Test
+    @DisplayName("Exception Test: brand name must not be null")
+    void brandControllerIntegration_UpdateBrand_GivenNullBrandName_ReturnsBadRequest() throws Exception {
+        brandDto.setName(null);
+
+        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + 1L, brandDto, ProblemDetail.class);
+
+        assertNotNull(problemDetail);
+        assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
+        assertEquals("Invalid request parameters", problemDetail.getDetail());
+    }
+
+    @Test
+    @DisplayName("Exception Test: brand name must not be empty")
+    void brandControllerIntegration_UpdateBrand_GivenEmptyBrandName_ReturnsBadRequest() throws Exception {
+        brandDto.setName("");
+
+        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + 1L, brandDto, ProblemDetail.class);
+
+        assertNotNull(problemDetail);
+        assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
+        assertEquals("Invalid request parameters", problemDetail.getDetail());
+    }
+
+    @Test
+    @DisplayName("Exception Test: brand name must not already exist")
+    void brandControllerIntegration_UpdateBrand_GivenBrandNameAlreadyExists_ReturnsConflict() throws Exception {
+        Brand brand = generateBrand();
+        brandRepository.save(brand);
+
+        String id = brand.getId().toString();
+        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + id, brandDto, ProblemDetail.class);
+
+        assertNotNull(problemDetail);
+        assertEquals(HttpStatus.CONFLICT.value(), problemDetail.getStatus());
+        assertEquals("Brand name already exists", problemDetail.getDetail());
+    }
+
+    @Test
+    @DisplayName("Exception Test: brand does not exist")
+    void brandControllerIntegration_UpdateBrand_GivenBrandDoesNotExists_ReturnsNotFound() throws Exception {
+        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + 1L, brandDto, ProblemDetail.class);
+
+        assertNotNull(problemDetail);
+        assertEquals(HttpStatus.NOT_FOUND.value(), problemDetail.getStatus());
+        assertEquals("Brand not found", problemDetail.getDetail());
+    }
+    //endregion
+
     //region DELETE "/id/delete"
     @SneakyThrows
     @Test

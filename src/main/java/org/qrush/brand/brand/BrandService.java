@@ -44,13 +44,12 @@ public class BrandService {
     }
 
     public BrandDto createBrand(BrandDto brandDto) {
-        Brand brand = new Brand();
-        brand.setName(brandDto.getName());
-
-        var existingBrand = brandRepository.findByName(brand.getName()).orElse(null);
-        if (existingBrand != null) {
+        if (checkBrandNameExists(brandDto)) {
             throw new BrandAlreadyExists("Brand name already exists");
         }
+
+        Brand brand = new Brand();
+        brand.setName(brandDto.getName());
 
         Brand newBrand = brandRepository.save(brand);
 
@@ -58,6 +57,19 @@ public class BrandService {
         brandResponse.setId(newBrand.getId());
         brandResponse.setName(newBrand.getName());
         return brandResponse;
+    }
+
+    public BrandDto updateBrand(BrandDto brandDto, Long id) {
+        Brand brand = brandRepository.findById(id).orElseThrow(() -> new BrandNotFoundException("Brand not found"));
+
+        if (checkBrandNameExists(brandDto)) {
+            throw new BrandAlreadyExists("Brand name already exists");
+        }
+
+        brand.setName(brandDto.getName());
+
+        Brand updatedBrand = brandRepository.save(brand);
+        return mapToDto(updatedBrand);
     }
 
     public void deleteBrand(Long id) {
@@ -70,6 +82,11 @@ public class BrandService {
         brandDto.setId(brand.getId());
         brandDto.setName(brand.getName());
         return brandDto;
+    }
+
+    private boolean checkBrandNameExists(BrandDto brandDto) {
+        var existingBrand = brandRepository.findByName(brandDto.getName()).orElse(null);
+        return existingBrand != null;
     }
 }
 

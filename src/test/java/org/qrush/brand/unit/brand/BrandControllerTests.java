@@ -183,6 +183,82 @@ class BrandControllerTests {
     }
     //endregion
 
+    //region PUT
+    @Test
+    void brandController_UpdateBrand_ReturnsUpdatedBrand() throws Exception {
+        Long id = 1L;
+        when(brandService.updateBrand(brandDto, id)).thenReturn(brandDto);
+
+        ResultActions response = mockMvc.perform(put("/brand/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk());
+        response.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(brandDto)));
+    }
+
+    @Test
+    void brandController_UpdateBrand_WhenBrandNotFound_ReturnsNotFound() throws Exception {
+        Long id = 1L;
+        when(brandService.updateBrand(brandDto, id)).thenThrow(BrandNotFoundException.class);
+
+        ResultActions response = mockMvc.perform(put("/brand/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    void brandController_UpdateBrand_WhenBrandNameAlreadyExists_ReturnsConflict() throws Exception {
+        Long id = 1L;
+        when(brandService.updateBrand(brandDto, id)).thenThrow(BrandAlreadyExists.class);
+
+        ResultActions response = mockMvc.perform(put("/brand/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isConflict());
+    }
+
+    @Test
+    void brandController_UpdateBrand_GivenEmptyJSON_ReturnsBadRequest() throws Exception {
+        Long id = 1L;
+
+        ResultActions response = mockMvc.perform(put("/brand/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Collections.EMPTY_MAP)));
+
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Invalid request parameters"));
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.invalid-params.name").value("Brand name cannot be null or empty"));
+    }
+
+    @Test
+    void brandController_UpdateBrand_GivenInvalidJSON_ReturnsBadRequest() throws Exception {
+        Long id = 1L;
+
+        ResultActions response = mockMvc.perform(put("/brand/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Collections.singletonMap("request", "this doesn't match our schema"))));
+
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.detail").value("Invalid request parameters"));
+        response.andExpect(MockMvcResultMatchers.jsonPath("$.invalid-params.name").value("Brand name cannot be null or empty"));    }
+
+    @Test
+    void brandController_UpdateBrand_WhenBrandRepositoryFails_ReturnInternalServerError() throws Exception {
+        Long id = 1L;
+        when(brandService.updateBrand(brandDto, id)).thenThrow(ServiceException.class);
+
+        ResultActions response = mockMvc.perform(put("/brand/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
+    //endregion
+
     //region DELETE
     @Test
     void brandController_DeleteBrandById_ReturnsNoContent() throws Exception {
