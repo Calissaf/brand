@@ -75,6 +75,24 @@ public class AbstractIntegrationTest extends TestFactory {
         return perfomGetRequest(path, responseType, status().is5xxServerError());
     }
 
+    protected <T> T performPutRequest(String path, Object object, Class<T> responseType, ResultMatcher expectedStatus) throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put(path)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(object)))
+                .andExpect(expectedStatus)
+                .andReturn();
+
+        return convertStringToClass(result.getResponse().getContentAsString(), responseType);
+    }
+
+    protected <T> T performPutRequestExpectedSuccess(String path, Object object, Class<T> responseType) throws Exception {
+        return performPutRequest(path, object, responseType, status().is2xxSuccessful());
+    }
+
+    protected <T> T performPutRequestExpectedClientError(String path, Object object, Class<T> responseType) throws Exception {
+        return performPutRequest(path, object, responseType, status().is4xxClientError());
+    }
+
     protected MockHttpServletResponse performDeleteRequest(String path, ResultMatcher expectedStatus) throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete(path))
                 .andExpect(expectedStatus)
