@@ -19,6 +19,7 @@ import org.qrush.brand.restaurant.models.Restaurant;
 import org.springframework.data.geo.Point;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -41,7 +42,7 @@ public class RestaurantServiceTests {
     @InjectMocks
     private RestaurantService restaurantService;
 
-    private Long brandId;
+    private UUID brandId;
     private BrandDto brandDto;
     private Brand brand;
     private RestaurantDto restaurantDto;
@@ -49,7 +50,7 @@ public class RestaurantServiceTests {
 
     @BeforeEach
     public void setup() {
-        brandId = 1L;
+        brandId = UUID.randomUUID();
         brand = Brand.builder()
                 .id(brandId)
                 .name("Starbucks")
@@ -78,7 +79,7 @@ public class RestaurantServiceTests {
     //region CREATE
     @Test
     public void restaurantService_CreateRestaurant_ReturnsRestaurantDto() {
-        when(brandService.getBrandById(Mockito.anyLong())).thenReturn(brandDto);
+        when(brandService.getBrandById(Mockito.any())).thenReturn(brandDto);
         when(restaurantRepository.save(Mockito.any(Restaurant.class))).thenReturn(restaurant);
 
         RestaurantDto savedRestaurantDto = restaurantService.createRestaurant(restaurantDto);
@@ -93,15 +94,15 @@ public class RestaurantServiceTests {
 
     @Test
     public void restaurantService_CreateRestaurant_GivenBrandDoesNotExist_ThrowsNotFoundException() {
-        when(brandService.getBrandById(Mockito.anyLong())).thenThrow(BrandNotFoundException.class);
+        when(brandService.getBrandById(Mockito.any())).thenThrow(BrandNotFoundException.class);
 
         assertThrows(BrandNotFoundException.class, () -> restaurantService.createRestaurant(restaurantDto));
     }
 
     @Test
     public void restaurantService_CreateBrand_GivenRestaurantNameAlreadyExistsForBrand_ThrowsRestaurantAlreadyExists() {
-        when(brandService.getBrandById(Mockito.anyLong())).thenReturn(brandDto);
-        when(restaurantRepository.findByNameAndBrandId(Mockito.anyString(), Mockito.anyLong())).thenReturn(Optional.of(restaurant));
+        when(brandService.getBrandById(Mockito.any())).thenReturn(brandDto);
+        when(restaurantRepository.findByNameAndBrandId(Mockito.anyString(), Mockito.any())).thenReturn(Optional.of(restaurant));
 
         assertThrows(RestaurantAlreadyExists.class, () -> restaurantService.createRestaurant(restaurantDto));
     }

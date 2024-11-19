@@ -6,6 +6,8 @@ import org.qrush.brand.brand.dto.BrandDto;
 import org.qrush.brand.brand.helpers.BrandMapper;
 import org.qrush.brand.brand.models.Brand;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BrandMapperTests {
@@ -19,12 +21,12 @@ public class BrandMapperTests {
         brandMapper = new BrandMapper();
 
         brand = Brand.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .name("Starbucks")
                 .build();
 
         brandDto = BrandDto.builder()
-                .id(2l)
+                .id(UUID.randomUUID())
                 .name("Costa")
                 .build();
 

@@ -15,6 +15,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.geo.Point;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -35,7 +37,7 @@ public class RestaurantRepositoryTests {
     public void setup() {
         brand = Brand.builder()
                 .name("Starbucks")
-                .id(1L)
+                .id(UUID.randomUUID())
                 .build();
 
         restaurant = Restaurant.builder()

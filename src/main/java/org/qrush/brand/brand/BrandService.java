@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BrandService {
@@ -21,7 +22,7 @@ public class BrandService {
         this.brandRepository = brandRepository;
     }
 
-    public BrandDto getBrandById(Long id) {
+    public BrandDto getBrandById(UUID id) {
        Brand brand = brandRepository.findById(id).orElseThrow(() -> new BrandNotFoundException("Brand could not be found"));
        return mapToDto(brand);
     }
@@ -59,7 +60,7 @@ public class BrandService {
         return brandResponse;
     }
 
-    public BrandDto updateBrand(BrandDto brandDto, Long id) {
+    public BrandDto updateBrand(BrandDto brandDto, UUID id) {
         Brand brand = brandRepository.findById(id).orElseThrow(() -> new BrandNotFoundException("Brand not found"));
 
         if (checkBrandNameExists(brandDto)) {
@@ -72,7 +73,7 @@ public class BrandService {
         return mapToDto(updatedBrand);
     }
 
-    public void deleteBrand(Long id) {
+    public void deleteBrand(UUID id) {
        Brand brand = brandRepository.findById(id).orElseThrow(() -> new BrandNotFoundException("Brand not found"));
        brandRepository.delete(brand);
     }

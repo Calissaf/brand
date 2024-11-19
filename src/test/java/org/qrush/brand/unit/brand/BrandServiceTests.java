@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doNothing;
@@ -70,7 +71,7 @@ class BrandServiceTests {
     //region GET
     @Test
     void brandService_FindById_ReturnsBrandDto() {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
 
         Brand brand = Brand.builder()
                 .id(id)
@@ -88,7 +89,7 @@ class BrandServiceTests {
 
     @Test
     void brandService_FindById_GivenBrandDoesntExist_ThrowsBrandNotFoundException() {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
 
         when(brandRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -115,7 +116,7 @@ class BrandServiceTests {
     public void brandService_UpdateBrand_ReturnsBrandDto() {
         Brand brand = Brand.builder()
                 .name("Starbucks")
-                .id(1L)
+                .id(UUID.randomUUID())
                 .build();
 
         BrandDto brandDto = BrandDto.builder()
@@ -123,7 +124,7 @@ class BrandServiceTests {
                 .id(brand.getId())
                 .build();
 
-        when(brandRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(brand));
+        when(brandRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(brand));
         when(brandRepository.findByName(Mockito.any(String.class))).thenReturn(Optional.empty());
         when(brandRepository.save(Mockito.any(Brand.class))).thenReturn(brand);
 
@@ -137,9 +138,9 @@ class BrandServiceTests {
     public void brandService_UpdateBrand_GivenBrandDoesNotExist_ThrowsBrandNotFoundException() {
         BrandDto brandDto = BrandDto.builder()
                 .name("Starbucks")
-                .id(1L)
+                .id(UUID.randomUUID())
                 .build();
-        when(brandRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.empty());
+        when(brandRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(BrandNotFoundException.class, () -> brandService.updateBrand(brandDto, brandDto.getId()));
     }
@@ -148,7 +149,7 @@ class BrandServiceTests {
     public void brandService_UpdateBrand_GivenBrandNameAlreadyExist_ThrowsBrandAlreadyExistsException() {
         Brand brand = Brand.builder()
                 .name("Starbucks")
-                .id(1L)
+                .id(UUID.randomUUID())
                 .build();
 
         BrandDto brandDto = BrandDto.builder()
@@ -156,7 +157,7 @@ class BrandServiceTests {
                 .id(brand.getId())
                 .build();
 
-        when(brandRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(brand));
+        when(brandRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(brand));
         when(brandRepository.findByName(Mockito.any(String.class))).thenReturn(Optional.of(brand));
 
         assertThrows(BrandAlreadyExists.class, () -> brandService.updateBrand(brandDto, brandDto.getId()));
@@ -166,7 +167,7 @@ class BrandServiceTests {
     //region DELETE
     @Test
     public void brandService_DeleteBrand_ReturnsVoid() {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         Brand brand = Brand.builder()
                 .name("Starbucks")
                 .id(id)
@@ -182,7 +183,7 @@ class BrandServiceTests {
 
     @Test
     void brandService_DeleteBrand_GivenBrandDoesntExist_ThrowsBrandNotFoundException() {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
 
         when(brandRepository.findById(id)).thenReturn(Optional.empty());
 

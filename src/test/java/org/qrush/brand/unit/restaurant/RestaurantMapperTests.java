@@ -8,6 +8,8 @@ import org.qrush.brand.restaurant.helpers.RestaurantMapper;
 import org.qrush.brand.restaurant.models.Restaurant;
 import org.springframework.data.geo.Point;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RestaurantMapperTests {
@@ -22,14 +24,14 @@ public class RestaurantMapperTests {
         restaurantMapper = new RestaurantMapper();
 
         brand = Brand.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .name("Starbucks")
                 .build();
 
         restaurantDto = RestaurantDto.builder()
                 .id(null)
                 .name("Starbucks Ipswich")
-                .brandId(1L)
+                .brandId(UUID.randomUUID())
                 .address("123 Street")
                 .latitude(1.0)
                 .longitude(50.0)

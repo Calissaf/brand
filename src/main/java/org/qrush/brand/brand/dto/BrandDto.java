@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotEmpty;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class BrandDto {
 
-    private Long id;
+    private UUID id;
 
     @NotEmpty(message = "Brand name cannot be null or empty")
     private String name;

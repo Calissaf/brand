@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/brand/{brand_id}/restaurant")
 public class RestaurantController {
@@ -16,7 +18,7 @@ public class RestaurantController {
     }
 
     @PostMapping()
-    public ResponseEntity<RestaurantDto> createRestaurant(@PathVariable("brand_id") Long brandId, @RequestBody @Valid RestaurantDto restaurantDto) {
+    public ResponseEntity<RestaurantDto> createRestaurant(@PathVariable("brand_id") UUID brandId, @RequestBody @Valid RestaurantDto restaurantDto) {
         restaurantDto.setBrandId(brandId);
         return new ResponseEntity<>(restaurantService.createRestaurant(restaurantDto), HttpStatus.CREATED);
     }
