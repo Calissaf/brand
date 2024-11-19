@@ -1,6 +1,9 @@
-package org.qrush.brand.brand.exceptions;
+package org.qrush.brand;
 
 import org.hibernate.service.spi.ServiceException;
+import org.qrush.brand.brand.exceptions.BrandAlreadyExists;
+import org.qrush.brand.brand.exceptions.BrandNotFoundException;
+import org.qrush.brand.restaurant.exceptions.RestaurantAlreadyExists;
 import org.springframework.http.*;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +31,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setInstance(URI.create(request.getContextPath()));
         return problemDetail;
     }
+
+    @ExceptionHandler(RestaurantAlreadyExists.class)
+    public ProblemDetail handleRestaurantAlreadyExists(RestaurantAlreadyExists ex, WebRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problemDetail.setInstance(URI.create(request.getContextPath()));
+        return problemDetail;    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
