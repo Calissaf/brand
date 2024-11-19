@@ -57,7 +57,7 @@ class BrandControllerTests {
     void brandController_CreateBrand_ReturnsCreatedBrand() throws Exception {
         given(brandService.createBrand(ArgumentMatchers.any())).willAnswer((invocation -> invocation.getArgument(0)));
 
-        ResultActions response = mockMvc.perform(post("/brand/create")
+        ResultActions response = mockMvc.perform(post("/brand")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(brandDto)));
 
@@ -68,7 +68,7 @@ class BrandControllerTests {
     @Test
     void brandController_CreateBrand_GivenEmptyJSON_ReturnsBadRequest() throws Exception {
 
-        ResultActions response = mockMvc.perform(post("/brand/create")
+        ResultActions response = mockMvc.perform(post("/brand")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Collections.EMPTY_MAP)));
 
@@ -80,7 +80,7 @@ class BrandControllerTests {
     @Test
     void brandController_CreateBrand_GivenInvalidJSON_ReturnsBadRequest() throws Exception {
 
-        ResultActions response = mockMvc.perform(post("/brand/create")
+        ResultActions response = mockMvc.perform(post("/brand")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Collections.singletonMap("request", "this doesn't match our schema"))));
 
@@ -92,7 +92,7 @@ class BrandControllerTests {
     void brandController_CreateBrand_WhenBrandRepositoryFails_ReturnInternalServerError() throws Exception {
         when(brandService.createBrand(ArgumentMatchers.any())).thenThrow(ServiceException.class);
 
-        ResultActions response = mockMvc.perform(post("/brand/create")
+        ResultActions response = mockMvc.perform(post("/brand")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(brandDto)));
 
@@ -103,7 +103,7 @@ class BrandControllerTests {
     void brandController_CreateBrand_WhenBrandAlreadyExists_ReturnsConflict() throws Exception {
         when(brandService.createBrand(ArgumentMatchers.any())).thenThrow(BrandAlreadyExists.class);
 
-        ResultActions response = mockMvc.perform(post("/brand/create")
+        ResultActions response = mockMvc.perform(post("/brand")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(brandDto)));
 
