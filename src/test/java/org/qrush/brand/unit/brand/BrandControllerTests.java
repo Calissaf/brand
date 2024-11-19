@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -115,7 +116,7 @@ class BrandControllerTests {
     //region GETBYID
     @Test
     void brandController_GetBrandById_ReturnsBrandDto() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         when(brandService.getBrandById(id)).thenReturn(brandDto);
 
         ResultActions response = mockMvc.perform(get("/brand/" + id));
@@ -126,7 +127,7 @@ class BrandControllerTests {
 
     @Test
     void brandController_GetBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         when(brandService.getBrandById(id)).thenThrow(BrandNotFoundException.class);
 
         ResultActions response = mockMvc.perform(get("/brand/" + id));
@@ -136,7 +137,7 @@ class BrandControllerTests {
 
     @Test
     void brandController_GetBrandById_WhenBrandServiceFails_ReturnsInternalServerError() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         when(brandService.getBrandById(id)).thenThrow(ServiceException.class);
 
         ResultActions response = mockMvc.perform(get("/brand/" + id));
@@ -186,7 +187,7 @@ class BrandControllerTests {
     //region PUT
     @Test
     void brandController_UpdateBrand_ReturnsUpdatedBrand() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         when(brandService.updateBrand(brandDto, id)).thenReturn(brandDto);
 
         ResultActions response = mockMvc.perform(put("/brand/" + id)
@@ -199,7 +200,7 @@ class BrandControllerTests {
 
     @Test
     void brandController_UpdateBrand_WhenBrandNotFound_ReturnsNotFound() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         when(brandService.updateBrand(brandDto, id)).thenThrow(BrandNotFoundException.class);
 
         ResultActions response = mockMvc.perform(put("/brand/" + id)
@@ -211,7 +212,7 @@ class BrandControllerTests {
 
     @Test
     void brandController_UpdateBrand_WhenBrandNameAlreadyExists_ReturnsConflict() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         when(brandService.updateBrand(brandDto, id)).thenThrow(BrandAlreadyExists.class);
 
         ResultActions response = mockMvc.perform(put("/brand/" + id)
@@ -223,7 +224,7 @@ class BrandControllerTests {
 
     @Test
     void brandController_UpdateBrand_GivenEmptyJSON_ReturnsBadRequest() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
 
         ResultActions response = mockMvc.perform(put("/brand/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -236,7 +237,7 @@ class BrandControllerTests {
 
     @Test
     void brandController_UpdateBrand_GivenInvalidJSON_ReturnsBadRequest() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
 
         ResultActions response = mockMvc.perform(put("/brand/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -248,7 +249,7 @@ class BrandControllerTests {
 
     @Test
     void brandController_UpdateBrand_WhenBrandServiceFails_ReturnInternalServerError() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         when(brandService.updateBrand(brandDto, id)).thenThrow(ServiceException.class);
 
         ResultActions response = mockMvc.perform(put("/brand/" + id)
@@ -262,30 +263,30 @@ class BrandControllerTests {
     //region DELETE
     @Test
     void brandController_DeleteBrandById_ReturnsNoContent() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         doNothing().when(brandService).deleteBrand(id);
 
-        ResultActions response = mockMvc.perform(delete(String.format("/brand/%d/delete", id)));
+        ResultActions response = mockMvc.perform(delete(String.format("/brand/%s/delete", id)));
 
         response.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     @Test
     void brandController_DeleteBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         doThrow(BrandNotFoundException.class).when(brandService).deleteBrand(id);
 
-        ResultActions response = mockMvc.perform(delete(String.format("/brand/%d/delete", id)));
+        ResultActions response = mockMvc.perform(delete(String.format("/brand/%s/delete", id)));
 
         response.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
     void brandController_DeleteBrandById_WhenBrandServiceFails_ReturnsInternalServerError() throws Exception {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
         doThrow(ServiceException.class).when(brandService).deleteBrand(id);
 
-        ResultActions response = mockMvc.perform(delete(String.format("/brand/%d/delete", id)));
+        ResultActions response = mockMvc.perform(delete(String.format("/brand/%s/delete", id)));
 
         response.andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }

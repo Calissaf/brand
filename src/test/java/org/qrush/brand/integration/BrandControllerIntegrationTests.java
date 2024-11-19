@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -43,7 +44,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
         assertNotNull(createdBrand);
         assertEquals("Starbucks", createdBrand.getName());
-        assertEquals(1L, createdBrand.getId());
+        assertNotNull(createdBrand.getId());
     }
 
     @Test
@@ -97,14 +98,14 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
         assertNotNull(brandResponse);
         assertEquals("Starbucks", brandResponse.getName());
-        assertEquals(1L, brandResponse.getId());
+        assertNotNull(brandResponse.getId());
     }
 
     @Test
     @DisplayName("Exception Test: brand does not exist")
     void brandControllerIntegration_GetBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
 
-        ProblemDetail problemDetail = performGetRequestExpectClientError(BRAND_API_ENDPOINT + "/1", ProblemDetail.class);
+        ProblemDetail problemDetail = performGetRequestExpectClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), ProblemDetail.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.NOT_FOUND.value(), problemDetail.getStatus());
@@ -181,7 +182,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
 
         assertNotNull(updatedBrand);
         assertEquals(brandDto.getName(), updatedBrand.getName());
-        assertEquals(1L, updatedBrand.getId());
+        assertNotNull(updatedBrand.getId());
     }
 
     @Test
@@ -189,7 +190,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_UpdateBrand_GivenNullBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName(null);
 
-        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + 1L, brandDto, ProblemDetail.class);
+        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), brandDto, ProblemDetail.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -201,7 +202,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_UpdateBrand_GivenEmptyBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName("");
 
-        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + 1L, brandDto, ProblemDetail.class);
+        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), brandDto, ProblemDetail.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -225,7 +226,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     @Test
     @DisplayName("Exception Test: brand does not exist")
     void brandControllerIntegration_UpdateBrand_GivenBrandDoesNotExists_ReturnsNotFound() throws Exception {
-        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + 1L, brandDto, ProblemDetail.class);
+        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), brandDto, ProblemDetail.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.NOT_FOUND.value(), problemDetail.getStatus());
@@ -253,7 +254,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     @Test
     @DisplayName("ExceptionTest: when brand does not exist returns not found")
     void brandControllerIntegration_DeleteBrandById_WhenBrandNotFound_ReturnsNotFound() throws Exception {
-        var url = String.format("%s/%s/delete", BRAND_API_ENDPOINT, 1);
+        var url = String.format("%s/%s/delete", BRAND_API_ENDPOINT, UUID.randomUUID());
 
         var response = performDeleteRequestExpectClientError(url);
 

@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -43,7 +44,7 @@ public class RestaurantControllerTests {
     @BeforeEach
     public void setup() {
         brand = Brand.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .name("Starbucks")
                 .build();
 
