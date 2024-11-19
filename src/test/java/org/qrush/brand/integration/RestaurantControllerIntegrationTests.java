@@ -27,12 +27,14 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     private RestaurantDto restaurantDto;
     private Brand brand;
     private Brand savedBrand;
+    private String url;
 
     @PostConstruct
     public void setup() {
         restaurantDto = generateRestaurantDto();
         brand = generateBrand();
         savedBrand = brandRepository.save(brand);
+        url = BRAND_API_ENDPOINT + "/" + savedBrand.getId().toString() + "/restaurant";
     }
 
     // region POST
@@ -40,7 +42,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     @DisplayName("Happy Path Test: create and return restaurant")
     void restaurantControllerIntegration_CreateRestaurant_ReturnsRestaurantDto() throws Exception {
 
-        RestaurantDto createdRestaurant = performPostRequestExpectedSuccess(BRAND_API_ENDPOINT + "/" + savedBrand.getId().toString(), restaurantDto, RestaurantDto.class);
+        RestaurantDto createdRestaurant = performPostRequestExpectedSuccess(url, restaurantDto, RestaurantDto.class);
 
         assertNotNull(createdRestaurant);
         assertNotNull(createdRestaurant.getId());
@@ -56,7 +58,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenEmptyRestaurantName_ReturnsBadRequest() throws Exception {
         restaurantDto.setName("");
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -69,7 +71,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenNullRestaurantName_ReturnsBadRequest() throws Exception {
         restaurantDto.setName(null);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -82,7 +84,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenEmptyRestaurantAddress_ReturnsBadRequest() throws Exception {
         restaurantDto.setAddress("");
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -95,7 +97,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenNullRestaurantAddress_ReturnsBadRequest() throws Exception {
         restaurantDto.setAddress(null);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -108,7 +110,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenNullRestaurantLongitude_ReturnsBadRequest() throws Exception {
         restaurantDto.setLongitude(null);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -121,7 +123,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenNullRestaurantLatitude_ReturnsBadRequest() throws Exception {
         restaurantDto.setLatitude(null);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -134,7 +136,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenRestaurantLongitudeGreaterThan180_ReturnsBadRequest() throws Exception {
         restaurantDto.setLongitude(181.0);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -147,7 +149,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenRestaurantLongitudeLessThanNegative180_ReturnsBadRequest() throws Exception {
         restaurantDto.setLongitude(-181.0);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -160,7 +162,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenRestaurantLatitudeGreaterThan90_ReturnsBadRequest() throws Exception {
         restaurantDto.setLatitude(91.0);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -173,7 +175,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     void restaurantControllerIntegration_CreateRestaurant_GivenRestaurantLatitudeLessThanNegative90_ReturnsBadRequest() throws Exception {
         restaurantDto.setLatitude(-91.0);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -193,7 +195,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
 
         restaurantRepository.save(restaurant);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + savedBrand.getId(), restaurantDto, ExtendedProblemDetails.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(url, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.CONFLICT.value(), problemDetail.getStatus());
@@ -206,7 +208,9 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
         Long id = savedBrand.getId();
         brandRepository.delete(savedBrand);
 
-        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/" + id, restaurantDto, ExtendedProblemDetails.class);
+        var invalidBrandUrl = BRAND_API_ENDPOINT + "/" + id + "/restaurant";
+
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(invalidBrandUrl, restaurantDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.NOT_FOUND.value(), problemDetail.getStatus());

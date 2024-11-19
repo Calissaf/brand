@@ -38,6 +38,7 @@ public class RestaurantControllerTests {
     private ObjectMapper objectMapper;
     private Brand brand;
     private RestaurantDto restaurantDto;
+    private String url;
 
     @BeforeEach
     public void setup() {
@@ -57,6 +58,7 @@ public class RestaurantControllerTests {
                 .build();
 
 
+        url = String.format("/brand/%s/restaurant", brand.getId());
     }
 
     //region CREATE
@@ -64,7 +66,7 @@ public class RestaurantControllerTests {
     void restaurantController_CreateRestaurant_ReturnsCreatedRestaurant() throws Exception {
         given(restaurantService.createRestaurant(ArgumentMatchers.any())).willAnswer((invocation -> invocation.getArgument(0)));
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(restaurantDto)));
 
@@ -76,7 +78,7 @@ public class RestaurantControllerTests {
     void restaurantController_CreateRestaurant_GivenLongitudeOutsideRange_ReturnsBadRequest() throws Exception {
         restaurantDto.setLongitude(200.0);
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(restaurantDto)));
 
@@ -89,7 +91,7 @@ public class RestaurantControllerTests {
     void restaurantController_CreateRestaurant_GivenLatitudeOutsideRange_ReturnsBadRequest() throws Exception {
         restaurantDto.setLatitude(200.0);
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(restaurantDto)));
 
@@ -102,7 +104,7 @@ public class RestaurantControllerTests {
     void restaurantController_CreateRestaurant_GivenEmptyName_ReturnsBadRequest() throws Exception {
         restaurantDto.setName("");
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(restaurantDto)));
 
@@ -115,7 +117,7 @@ public class RestaurantControllerTests {
     void restaurantController_CreateRestaurant_GivenEmptyAddress_ReturnsBadRequest() throws Exception {
         restaurantDto.setAddress("");
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(restaurantDto)));
 
@@ -127,7 +129,7 @@ public class RestaurantControllerTests {
     @Test
     void restaurantController_CreateRestaurant_GivenInvalidJson_ReturnsBadRequest() throws Exception {
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Collections.singletonMap("request", "this doesn't match our schema"))));
 
@@ -142,7 +144,7 @@ public class RestaurantControllerTests {
     @Test
     void restaurantController_CreateRestaurant_GivenEmptyJson_ReturnsBadRequest() throws Exception {
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Collections.EMPTY_MAP)));
 
@@ -158,7 +160,7 @@ public class RestaurantControllerTests {
     void restaurantController_CreateRestaurant_RestaurantServiceFails_ReturnsInternalServerError() throws Exception {
         doThrow(ServiceException.class).when(restaurantService).createRestaurant(restaurantDto);
 
-        ResultActions response = mockMvc.perform(post(String.format("/brand/%s", brand.getId()))
+        ResultActions response = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(restaurantDto)));
 
