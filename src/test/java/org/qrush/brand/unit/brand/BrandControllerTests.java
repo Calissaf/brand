@@ -89,7 +89,7 @@ class BrandControllerTests {
         response.andExpect(MockMvcResultMatchers.jsonPath("$.invalid-params.name").value("Brand name cannot be null or empty"));    }
 
     @Test
-    void brandController_CreateBrand_WhenBrandRepositoryFails_ReturnInternalServerError() throws Exception {
+    void brandController_CreateBrand_WhenBrandServiceFails_ReturnInternalServerError() throws Exception {
         when(brandService.createBrand(ArgumentMatchers.any())).thenThrow(ServiceException.class);
 
         ResultActions response = mockMvc.perform(post("/brand/create")
@@ -135,7 +135,7 @@ class BrandControllerTests {
     }
 
     @Test
-    void brandController_GetBrandById_WhenBrandRepositoryFails_ReturnsInternalServerError() throws Exception {
+    void brandController_GetBrandById_WhenBrandServiceFails_ReturnsInternalServerError() throws Exception {
         Long id = 1L;
         when(brandService.getBrandById(id)).thenThrow(ServiceException.class);
 
@@ -160,7 +160,7 @@ class BrandControllerTests {
     }
 
     @Test
-    void brandController_GetAllBrands_WhenBrandRepositoryFails_ReturnsInternalServerError() throws Exception {
+    void brandController_GetAllBrands_WhenBrandServiceFails_ReturnsInternalServerError() throws Exception {
         when(brandService.getAllBrands(0, 10)).thenThrow(ServiceException.class);
 
         ResultActions response = mockMvc.perform(get("/brand")
@@ -247,7 +247,7 @@ class BrandControllerTests {
         response.andExpect(MockMvcResultMatchers.jsonPath("$.invalid-params.name").value("Brand name cannot be null or empty"));    }
 
     @Test
-    void brandController_UpdateBrand_WhenBrandRepositoryFails_ReturnInternalServerError() throws Exception {
+    void brandController_UpdateBrand_WhenBrandServiceFails_ReturnInternalServerError() throws Exception {
         Long id = 1L;
         when(brandService.updateBrand(brandDto, id)).thenThrow(ServiceException.class);
 
@@ -281,7 +281,7 @@ class BrandControllerTests {
     }
 
     @Test
-    void brandController_DeleteBrandById_WhenBrandRepositoryFails_ReturnsInternalServerError() throws Exception {
+    void brandController_DeleteBrandById_WhenBrandServiceFails_ReturnsInternalServerError() throws Exception {
         Long id = 1L;
         doThrow(ServiceException.class).when(brandService).deleteBrand(id);
 
