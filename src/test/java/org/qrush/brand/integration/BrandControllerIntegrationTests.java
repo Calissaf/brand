@@ -9,6 +9,7 @@ import org.qrush.brand.brand.dto.BrandDto;
 import org.qrush.brand.brand.dto.BrandResponse;
 import org.qrush.brand.brand.models.Brand;
 import org.qrush.brand.integration.base.AbstractIntegrationTest;
+import org.qrush.brand.integration.base.ExtendedProblemDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -52,11 +53,12 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_CreateBrand_GivenNullBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName(null);
 
-        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ProblemDetail.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
         assertEquals("Invalid request parameters", problemDetail.getDetail());
+        assertEquals("Brand name cannot be null or empty", problemDetail.invalidParams.get("name"));
     }
 
     @Test
@@ -64,11 +66,12 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_CreateBrand_GivenEmptyBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName("");
 
-        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ProblemDetail.class);
+        ExtendedProblemDetails problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
         assertEquals("Invalid request parameters", problemDetail.getDetail());
+        assertEquals("Brand name cannot be null or empty", problemDetail.invalidParams.get("name"));
     }
 
     @Test
@@ -190,11 +193,12 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_UpdateBrand_GivenNullBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName(null);
 
-        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), brandDto, ProblemDetail.class);
+        ExtendedProblemDetails problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), brandDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
         assertEquals("Invalid request parameters", problemDetail.getDetail());
+        assertEquals("Brand name cannot be null or empty", problemDetail.invalidParams.get("name"));
     }
 
     @Test
@@ -202,11 +206,12 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_UpdateBrand_GivenEmptyBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName("");
 
-        ProblemDetail problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), brandDto, ProblemDetail.class);
+        ExtendedProblemDetails problemDetail = performPutRequestExpectedClientError(BRAND_API_ENDPOINT + "/" + UUID.randomUUID(), brandDto, ExtendedProblemDetails.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
         assertEquals("Invalid request parameters", problemDetail.getDetail());
+        assertEquals("Brand name cannot be null or empty", problemDetail.invalidParams.get("name"));
     }
 
     @Test
