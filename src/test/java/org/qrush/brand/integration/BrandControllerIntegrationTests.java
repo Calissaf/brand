@@ -39,7 +39,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     @DisplayName("Happy Path Test: create and return brand")
     void brandControllerIntegration_CreateBrand_ReturnsBrandDto() throws Exception {
 
-        BrandDto createdBrand = performPostRequestExpectedSuccess(BRAND_API_ENDPOINT + "/create", brandDto, BrandDto.class);
+        BrandDto createdBrand = performPostRequestExpectedSuccess(BRAND_API_ENDPOINT, brandDto, BrandDto.class);
 
         assertNotNull(createdBrand);
         assertEquals("Starbucks", createdBrand.getName());
@@ -51,7 +51,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_CreateBrand_GivenNullBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName(null);
 
-        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ProblemDetail.class);
+        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT, brandDto, ProblemDetail.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -63,7 +63,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
     void brandControllerIntegration_CreateBrand_GivenEmptyBrandName_ReturnsBadRequest() throws Exception {
         brandDto.setName("");
 
-        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ProblemDetail.class);
+        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT, brandDto, ProblemDetail.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -76,7 +76,7 @@ public class BrandControllerIntegrationTests extends AbstractIntegrationTest {
         Brand brand = generateBrand();
         brandRepository.save(brand);
 
-        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT + "/create", brandDto, ProblemDetail.class);
+        ProblemDetail problemDetail = performPostRequestExpectClientError(BRAND_API_ENDPOINT, brandDto, ProblemDetail.class);
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.CONFLICT.value(), problemDetail.getStatus());
