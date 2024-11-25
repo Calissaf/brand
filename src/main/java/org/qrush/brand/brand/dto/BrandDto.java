@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotEmpty;
+import org.qrush.brand.brand.models.Brand;
 
 @Data
 @Builder
@@ -17,4 +18,11 @@ public class BrandDto {
 
     @NotEmpty(message = "Brand name cannot be null or empty")
     private String name;
+
+    public Brand toBrand () {
+        return Brand.builder()
+                .name(name)
+                .id(id)
+                .build();
+    }
 }
