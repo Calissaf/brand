@@ -47,6 +47,7 @@ class BrandServiceTests {
         BrandDto savedBrandDto = brandService.createBrand(brandDto);
 
         assertNotNull(savedBrandDto);
+        //ToDo: swap expected and equals
         assertEquals(savedBrandDto.getName(), brand.getName());
     }
 
