@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.qrush.brand.brand.models.Brand;
+import org.qrush.brand.restaurant.models.Restaurant;
+import org.springframework.data.geo.Point;
 
 import java.util.UUID;
 
@@ -36,4 +39,16 @@ public class RestaurantDto {
     private Double longitude;
 
     private UUID brandId;
+
+    public Restaurant toRestaurant(Brand brand) {
+        //ToDo: does this need logic to check brand matches brand id??
+        return Restaurant.builder()
+                .id(id)
+                .name(name)
+                .address(address)
+                .location(new Point(longitude, latitude))
+                .brand(brand)
+                .build();
+
+    }
 }
