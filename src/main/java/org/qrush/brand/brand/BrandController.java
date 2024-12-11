@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/brand")
 public class BrandController {
@@ -18,7 +20,7 @@ public class BrandController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BrandDto> getBrand(@PathVariable Long id) {
+    public ResponseEntity<BrandDto> getBrand(@PathVariable UUID id) {
         return ResponseEntity.ok(brandService.getBrandById(id));
     }
 
@@ -41,12 +43,12 @@ public class BrandController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BrandDto> updateBrand(@PathVariable Long id, @RequestBody @Valid BrandDto brandDto) {
+    public ResponseEntity<BrandDto> updateBrand(@PathVariable UUID id, @RequestBody @Valid BrandDto brandDto) {
         return new ResponseEntity<>(brandService.updateBrand(brandDto,id), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}/delete")
-    public ResponseEntity<Object> deleteBrand(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteBrand(@PathVariable UUID id) {
         brandService.deleteBrand(id);
         return ResponseEntity.noContent().build();
     }

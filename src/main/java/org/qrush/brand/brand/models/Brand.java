@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 import org.qrush.brand.brand.dto.BrandDto;
 
 
@@ -17,8 +18,8 @@ import org.qrush.brand.brand.dto.BrandDto;
 public class Brand {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(unique= true)
     @NotEmpty(message = "Brand name cannot be null or empty")

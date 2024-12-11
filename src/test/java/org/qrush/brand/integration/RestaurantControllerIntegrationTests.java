@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.http.HttpStatus;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -205,7 +207,7 @@ public class RestaurantControllerIntegrationTests extends AbstractIntegrationTes
     @Test
     @DisplayName("Exception Test: brand must exist")
     void restaurantControllerIntegration_CreateRestaurant_GivenBrandDoesNotExist_ReturnsNotFound() throws Exception {
-        Long id = savedBrand.getId();
+        UUID id = savedBrand.getId();
         brandRepository.delete(savedBrand);
 
         var invalidBrandUrl = BRAND_API_ENDPOINT + "/" + id + "/restaurant";

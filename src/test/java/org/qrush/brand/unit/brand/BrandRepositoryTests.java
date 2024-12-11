@@ -12,6 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,7 +33,6 @@ public class BrandRepositoryTests {
 
         assertNotNull(savedBrand);
         assertNotNull(savedBrand.getId());
-        assertTrue(savedBrand.getId() > 0, "id is greater than 0");
         assertEquals(brand.getName(), savedBrand.getName());
     }
 
@@ -42,7 +42,7 @@ public class BrandRepositoryTests {
                 .name("")
                 .build();
 
-        assertThrows(ConstraintViolationException.class, () -> brandRepository.save(brand));
+        assertThrows(ConstraintViolationException.class, () -> brandRepository.saveAndFlush(brand));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class BrandRepositoryTests {
                 .name(null)
                 .build();
 
-        assertThrows(ConstraintViolationException.class, () -> brandRepository.save(brand));
+        assertThrows(ConstraintViolationException.class, () -> brandRepository.saveAndFlush(brand));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class BrandRepositoryTests {
                 .build();
 
         brandRepository.save(brand1);
-        assertThrows(DataIntegrityViolationException.class, () -> brandRepository.save(brand2));
+        assertThrows(DataIntegrityViolationException.class, () -> brandRepository.saveAndFlush(brand2));
     }
 
     @Test
@@ -101,13 +101,12 @@ public class BrandRepositoryTests {
 
         assertNotNull(foundBrand);
         assertNotNull(foundBrand.getId());
-        assertTrue(foundBrand.getId() > 0, "id is greater than 0");
         assertEquals(brand.getName(), foundBrand.getName());
     }
 
     @Test
     public void brandRepository_FindById_GivenBrandIdDoesntExist_ReturnsNull() {
-        Brand foundBrand = brandRepository.findById(1L).orElse(null);
+        Brand foundBrand = brandRepository.findById(UUID.randomUUID()).orElse(null);
 
         assertNull(foundBrand);
     }
@@ -124,7 +123,6 @@ public class BrandRepositoryTests {
 
         assertNotNull(foundBrand);
         assertNotNull(foundBrand.getId());
-        assertTrue(foundBrand.getId() > 0, "id is greater than 0");
         assertEquals(brand.getName(), foundBrand.getName());
     }
 
