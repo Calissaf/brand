@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.qrush.brand.brand.models.Brand;
+import org.qrush.brand.restaurant.dto.RestaurantDto;
 import org.springframework.data.geo.Point;
 
 import java.util.UUID;
@@ -41,4 +42,15 @@ public class Restaurant {
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brand;
+
+    public RestaurantDto toDto() {
+        return RestaurantDto.builder()
+                .id(id)
+                .name(name)
+                .address(address)
+                .longitude(location.getX())
+                .latitude(location.getY())
+                .brandId(brand.getId())
+                .build();
+    }
 }

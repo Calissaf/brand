@@ -6,8 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.UUID;
+import org.qrush.brand.brand.dto.BrandDto;
 
 
 @Data
@@ -24,6 +24,13 @@ public class Brand {
     @Column(unique= true)
     @NotEmpty(message = "Brand name cannot be null or empty")
     private String name;
+
+    public BrandDto toDto() {
+        return BrandDto.builder()
+                .name(name)
+                .id(id)
+                .build();
+    }
 }
 
 
